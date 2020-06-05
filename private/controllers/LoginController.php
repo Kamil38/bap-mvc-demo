@@ -1,6 +1,6 @@
 <?php
 
-namespace Login\Controllers;
+namespace Website\Controllers;
 
 /**
  * Class HomeController
@@ -14,13 +14,21 @@ class LoginController {
 
 	public function loginForm() {
 
+        // $users = getUsers();
 
+		$template_engine = get_template_engine();
+        echo $template_engine->render('homepage');
+        // , ['users' => $users]
 
 	}
 
 	public function handleLoginForm() {
 
+        // $users = getUsers();
 
+		$template_engine = get_template_engine();
+        echo $template_engine->render('homepage');
+        // , ['users' => $users]
 
 	}
 
