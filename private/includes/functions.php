@@ -83,3 +83,56 @@ function current_route_is( $name ) {
 	return false;
 
 }
+
+function validateRegistrationData($data) {
+
+	$errors = [];
+
+	$email		= filter_var( $data['email'], FILTER_VALIDATE_EMAIL );
+	$wachtwoord = trim( $data['wachtwoord'] );
+
+	if ( $email === false ) {
+		$errors['email'] = 'Geen geldige email ingevuld';
+	}
+
+	if ( strlen( $wachtwoord ) < 6 ) {
+		$errors['wachtwoord'] = 'Geen geldige wachtwoord, minimaal 6 tekens!';
+	}
+
+	$data = [
+		'email' => $data['email'],
+		'wachtwoord' => $wachtwoord
+	];
+
+	return [
+		'data' => $data,
+		'errors' => $errors
+	];
+
+
+}
+
+function userNotRegistered($email) {
+
+	$connection = dbConnect();
+	$sql        = "SELECT * FROM `gebruikers` WHERE `email` = :email";
+	$statement	= $connection->prepare( $sql );
+	$statement->execute( [ 'email' => $email ] );
+
+	return ( $statement->rowCount() === 0 );
+}
+
+function createUser($email, $wachtwoord) {
+
+	$connection = dbConnect();
+
+	$sql	   = "INSERT INTO `gebruikers` (`email`, `wachtwoord`) VALUES (:email, :wachtwoord)";
+	$statement = $connection->prepare( $sql );
+	$safe_password = password_hash( $wachtwoord, PASSWORD_DEFAULT );
+	$params = [
+		'email' => $email,
+		'wachtwoord' => $safe_password
+	];	
+	$statement->execute( $params );
+
+}

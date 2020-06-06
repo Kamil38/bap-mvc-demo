@@ -24,46 +24,26 @@ class RegistrationController {
 
 	public function handleRegistrationForm() {
 
-		$errors = [];
+		$result = validateRegistrationData($_POST);
 
-		$email		= filter_var( $_POST['email'], FILTER_VALIDATE_EMAIL );
-		$wachtwoord = trim( $_POST['wachtwoord'] );
+		if ( count( $result['errors'] ) === 0 ) {
 
-		if ( $email === false ) {
-			$errors['email'] = 'Geen geldige email ingevuld';
-		}
+			if (userNotRegistered($result['data']['email'])) {
 
-		if ( strlen( $wachtwoord ) < 6 ) {
-			$errors['wachtwoord'] = 'Geen geldige wachtwoord, minimaal 6 tekens!';
-		}
+				createUser($result['data']['email'], $result['data']['wachtwoord']);
 
-		if ( count( $errors ) === 0 ) {
-			$connection = dbConnect();
-			$sql        = "SELECT * FROM `gebruikers` WHERE `email` = :email";
-			$statement	= $connection->prepare( $sql );
-			$statement->execute( [ 'email' => $email ] );
-		}
+				$bedanktUrl = url('register.thankyou');
+				redirect($bedanktUrl);
 
-		if ( $statement->rowCount() === 0  ) {
-			$sql	   = "INSERT INTO `gebruikers` (`email`, `wachtwoord`) VALUES (:email, :wachtwoord)";
-			$statement = $connection->prepare( $sql );
-			$safe_password = password_hash( $wachtwoord, PASSWORD_DEFAULT );
-			$params = [
-				'email' => $email,
-				'wachtwoord' => $safe_password
-			];	
-			$statement->execute( $params );
+			} else {
 
-			$bedanktUrl = url('register.thankyou');
-			redirect($bedanktUrl);
-
-
-		} else {
-			$errors['email'] = 'Dit account bestaat al';
+				$errors['email'] = 'Dit account bestaat al';
+				
+			}
 		}
 
 		$template_engine = get_template_engine();
-        echo $template_engine->render('register_form', ['errors' => $errors]);
+        echo $template_engine->render('register_form', ['errors' => $result['errors']]);
 
 	}
 
