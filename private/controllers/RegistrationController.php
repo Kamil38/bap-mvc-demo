@@ -39,7 +39,8 @@ class RegistrationController {
 
 				$errors['email'] = 'Dit account bestaat al';
 				
-			}
+			}      
+			
 		}
 
 		$template_engine = get_template_engine();
